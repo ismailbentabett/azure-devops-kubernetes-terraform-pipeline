@@ -1,37 +1,25 @@
 trigger:
 - master
 
-# strategy:
-#   matrix:
-#     linux:
-#       operatingSystem: 'ubuntu-latest'
-#     mac:
-#       operatingSystem: 'macos-latest'
+resources:
+- repo: self
 
-pool:
-  vmImage: 'ubuntu-latest'
+variables:
+  tag: '$(Build.BuildId)'
 
 stages:
 - stage: Build
-  jobs:
-  - job: BuildJob
+  displayName: Build image
+  jobs:  
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: 'ubuntu-latest'
     steps:
-    - bash: echo "Do the build"
-- stage: DevDeploy
-  jobs:
-  - deployment: DevDeployJob
-    environment: Dev
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - script: echo deploy to Dev
-- stage: QADeploy
-  jobs:
-  - deployment: QADeployJob
-    environment: QA
-    strategy:
-      runOnce:
-        deploy:
-          steps:
-          - script: echo deploy to QA
+    - task: Docker@2
+      inputs:
+        containerRegistry: 'in28min-docker-hub'
+        repository: 'in28min/currency-exchange-devops'
+        command: 'buildAndPush'
+        Dockerfile: '**/Dockerfile'
+        tags: '$(tag)'
