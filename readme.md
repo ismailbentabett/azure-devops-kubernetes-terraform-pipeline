@@ -1,47 +1,57 @@
-### Microservices
+# Currency Exchange Micro Service - H2
 
-These simple microservices enable us to **focus on** learning the tools - Docker, Kubernetes, CI, CD and  build the infrastructure needed around typical microservices.
+Run com.in28minutes.microservices.currencyconversionservice.CurrencyConversionServiceApplicationH2 as a Java Application.
 
-### Currency Exchange Service
+## Resources
 
-If you ask it the value of 1 USD in INR, or 1 Australian Dollar in INR, the Currency Exchange Service answers 
-- 1 USD is 60 INR
-- 1 Australian Dollars is 50 INR. 
-
-http://localhost:8000/currency-exchange/from/EUR/to/INR
+- http://localhost:8000/currency-exchange/from/USD/to/INR
 
 ```json
 {
-  "id": 10002,
-  "from": "EUR",
+  "id": 10001,
+  "from": "USD",
   "to": "INR",
-  "conversionMultiple": 75.00,
-  "exchangeEnvironmentInfo": "37f1ad927c6e v1 27c6e"
+  "conversionMultiple": 65.00,
+  "environmentInfo": "NA"
 }
 ```
 
-### Currency Conversion
+## H2 Console
 
-Currency Conversion Service is used to convert a bucket of currencies. If you want to find the value of 10 USD, Currency Conversion Service returns 600. 
-- **STEP 1** : Currency Conversion Service calls the Currency Exchange Service for the value of 1 USD. It gets a response back saying 60.
-- **STEP 2** : The Currency Conversion Service then multiplies 10 by 60, and returns 600 back. 
+- http://localhost:8000/h2-console
+- Use `jdbc:h2:mem:testdb` as JDBC URL
 
-http://localhost:8100/currency-conversion/from/EUR/to/INR/quantity/10
 
-```json
-{
-  "id": 10002,
-  "from": "EUR",
-  "to": "INR",
-  "conversionMultiple": 75.00,
-  "quantity": 10,
-  "totalCalculatedAmount": 750.00,
-  "exchangeEnvironmentInfo": "37f1ad927c6e v1 27c6e",
-  "conversionEnvironmentInfo": "fb6316b5713d v1 5713d"
-}
+## Notes
+
+## Tables Created
+```
+create table exchange_value 
+(
+	id bigint not null, 
+	conversion_multiple decimal(19,2), 
+	currency_from varchar(255), 
+	currency_to varchar(255), 
+	primary key (id)
+)
 ```
 
-#### How does Currency Conversion know the location of Currency Exchange?
-- You don't want to HARDCODE
-- Configure an Environment Variable - `CURRENCY_EXCHANGE_SERVICE_HOST`
-- --env CURRENCY_EXCHANGE_SERVICE_HOST=http://currency-exchange
+## Containerization
+
+### Troubleshooting
+
+- Problem - Caused by: com.spotify.docker.client.shaded.javax.ws.rs.ProcessingException: java.io.IOException: No such file or directory
+- Solution - Check if docker is up and running!
+- Problem - Error creating the Docker image on MacOS - java.io.IOException: Cannot run program “docker-credential-osxkeychain”: error=2, No such file or directory
+- Solution - https://medium.com/@dakshika/error-creating-the-docker-image-on-macos-wso2-enterprise-integrator-tooling-dfb5b537b44e
+
+### Creating Container
+
+- mvn package
+
+### Running Container
+
+#### Basic
+```
+docker container run --publish 8000:8000 in28min/currency-exchange:0.0.1-SNAPSHOT
+```
